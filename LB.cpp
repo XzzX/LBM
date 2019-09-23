@@ -34,7 +34,7 @@ void LB::computeVariables(const double f[DIM_I], double& rho, double& ux, double
 	uy = 0;
 	uSqr = 0;
 
-	for (int iF = 0; iF<DIM_I; ++iF){
+	for (uint32_t iF = 0; iF<DIM_I; ++iF){
 		rho += f[iF];
 		ux += f[iF] * c[iF][0];
 		uy += f[iF] * c[iF][1];
@@ -50,8 +50,8 @@ double LB::fEq(const int iF, const double rho, const double ux, const double uy,
 }
 
 void	LB::InitWall() {
-	for (unsigned int x = 0; x < DIM_X; x++) 
-		for (unsigned int y = 0; y < DIM_Y; y++) {
+	for (uint32_t x = 0; x < DIM_X; x++) 
+		for (uint32_t y = 0; y < DIM_Y; y++) {
 			mWall[x][y] = BOUNDARY_CONDITION::FLUID;
 			if ((x == 0) || (x == DIM_X-1 ))
 				mWall[x][y] = BOUNDARY_CONDITION::NO_SLIP;
@@ -75,17 +75,17 @@ void	LB::InitDistributions() {
 }
 
 void	LB::Propagate() {
-	for (int x = 0; x<DIM_X; x++)
-		for (int y = 0; y<DIM_Y; y++)
-			for (int i = 0; i < DIM_I; i++) {
+	for (uint32_t x = 0; x<DIM_X; x++)
+		for (uint32_t y = 0; y<DIM_Y; y++)
+			for (uint32_t i = 0; i < DIM_I; i++) {
 				mFTemp[x][y][i] = mF[x][y][i];
 				mF[x][y][i] = 0;
 			}
 
-	for (int x = 0; x < DIM_X; x++)
-		for (int y = 0; y < DIM_Y; y++)
+	for (uint32_t x = 0; x < DIM_X; x++)
+		for (uint32_t y = 0; y < DIM_Y; y++)
 			if (mWall[x][y] == BOUNDARY_CONDITION::FLUID) {
-				for (int i = 0; i < DIM_I; i++) {
+				for (uint32_t i = 0; i < DIM_I; i++) {
 					int nextX = x + c[i][0];
 					int nextY = y + c[i][1];
 					if (mWall[nextX][nextY] == BOUNDARY_CONDITION::FLUID)
@@ -97,7 +97,7 @@ void	LB::Propagate() {
 }
 
 void	LB::DoBoundary() {
-	for (int y = 1; y < DIM_Y - 1; y++) {
+	for (uint32_t y = 1; y < DIM_Y - 1; y++) {
 		ZHPressureWest(mF[1][y], mU[1][y], 2);
 		ZHPressureEast(mF[DIM_X - 2][y], mU[DIM_X - 2][y], 1);
 	}
@@ -105,12 +105,12 @@ void	LB::DoBoundary() {
 
 void	LB::Collide(){
 	mRhoTot = 0;
-	for (int x = 0; x<DIM_X; x++) {
-		for (int y = 0; y<DIM_Y; y++) {
+	for (uint32_t x = 0; x<DIM_X; x++) {
+		for (uint32_t y = 0; y<DIM_Y; y++) {
 			if (mWall[x][y] == BOUNDARY_CONDITION::FLUID) {
 				computeVariables(mF[x][y], mRho[x][y], mU[x][y][0], mU[x][y][1], mU2[x][y]);
 				mRhoTot += mRho[x][y];
-				for (int i = 0; i < DIM_I; i++) {
+				for (uint32_t i = 0; i < DIM_I; i++) {
 					mF[x][y][i] = ( 1. - mOmega )*mF[x][y][i] + mOmega*fEq(i, mRho[x][y], mU[x][y][0], mU[x][y][1], mU2[x][y]);
 				}
 			}
@@ -126,8 +126,8 @@ void	LB::Step() {
 
 void	LB::PostProcessing(const std::string& filename) {
 	std::ofstream	oFile(filename);
-	for (int x = 0; x < DIM_X; x++)
-		for (int y = 0; y < DIM_Y; y++)
+	for (uint32_t x = 0; x < DIM_X; x++)
+		for (uint32_t y = 0; y < DIM_Y; y++)
 			oFile << x << "\t" << y << "\t" << mU[x][y][0] << "\t" << mU[x][y][1] << "\t" << mRho[x][y] << std::endl;
 	oFile.close();
 }
